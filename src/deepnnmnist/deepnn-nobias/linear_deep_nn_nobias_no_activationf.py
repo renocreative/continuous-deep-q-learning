@@ -3,6 +3,10 @@
 Training a deep "incomplete" ANN on MNIST with Tensorflow
 The ANN has no bias and no activation function
 
+This function does not learn very well because the the hypothesis is completely off
+The loss function is bad. The network is unstable in training (easily blow up) and 
+fails to learn the training dataset (<20% accuracy on training dataset)
+
 '''
 
 import tensorflow as tf
@@ -16,7 +20,7 @@ n_examples = None
 n_hidden_units_1 = 10
 n_hidden_units_2 = 5
 n_outputs = 10
-learning_rate = .01
+learning_rate = .001
 mini_batch_size = 50
 
 # Fetch the mnist data
@@ -31,9 +35,9 @@ yy = tf.placeholder(tf.float32, shape=(n_examples, n_outputs), name = "MyLabels"
 
 
 # Model hypothesis
-ww_1 = tf.Variable(tf.truncated_normal(shape=(n_features, n_hidden_units_1), mean = 0, stddev = .5, dtype=tf.float32), name = "MyWeights_1", trainable=True)
-ww_2 = tf.Variable(tf.truncated_normal(shape=(n_hidden_units_1, n_hidden_units_2), mean = 0, stddev = .5, dtype=tf.float32), name = "MyWeights_2", trainable=True)
-ww_3 = tf.Variable(tf.truncated_normal(shape=(n_hidden_units_2, n_outputs), mean = 0, stddev = .5, dtype=tf.float32), name = "MyWeights_final", trainable=True)
+ww_1 = tf.Variable(tf.truncated_normal(shape=(n_features, n_hidden_units_1), stddev = .05, dtype=tf.float32), name = "MyWeights_1", trainable=True)
+ww_2 = tf.Variable(tf.truncated_normal(shape=(n_hidden_units_1, n_hidden_units_2), stddev = .05, dtype=tf.float32), name = "MyWeights_2", trainable=True)
+ww_3 = tf.Variable(tf.truncated_normal(shape=(n_hidden_units_2, n_outputs), stddev = .05, dtype=tf.float32), name = "MyWeights_final", trainable=True)
 
 aa_1 = tf.matmul(xx, ww_1)
 #tf.nn.softmax(tf.matmul(xx, ww_1) + bb_1)
