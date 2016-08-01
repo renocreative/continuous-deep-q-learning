@@ -1,11 +1,8 @@
 '''
 
-Training a deep "incomplete" ANN on MNIST with Tensorflow
-The ANN has no bias and no activation function
+Training a deep ANN on MNIST with Tensorflow
 
-This function does not learn very well because the the hypothesis is completely off
-The loss function is bad. The network is unstable in training (easily blow up) and 
-fails to learn the training dataset (<20% accuracy on training dataset)
+Loss is the cross-entropy function
 
 '''
 
@@ -14,14 +11,14 @@ from tensorflow.examples.tutorials.mnist import input_data
 
 
 # Parameters
-n_epoch = 200
+n_epoch = 1200
 n_features = 784
 n_examples = None
 n_hidden_units_1 = 10
 n_hidden_units_2 = 5
 n_outputs = 10
-learning_rate = .1
-mini_batch_size = 50
+learning_rate = .5
+mini_batch_size = 100
 
 # Fetch the mnist data
 def fetch():
@@ -35,12 +32,12 @@ yy = tf.placeholder(tf.float32, shape=(n_examples, n_outputs), name = "MyLabels"
 
 
 # Model hypothesis
-ww_1 = tf.Variable(tf.truncated_normal(shape=(n_features, n_hidden_units_1), stddev = .1, dtype=tf.float32), name = "MyWeights_1", trainable=True)
-bb_1 = tf.Variable(tf.zeros([n_hidden_units_1], dtype=tf.float32), name = "MyBias_1", trainable=True)
-ww_2 = tf.Variable(tf.truncated_normal(shape=(n_hidden_units_1, n_hidden_units_2), stddev = .1, dtype=tf.float32), name = "MyWeights_2", trainable=True)
-bb_2 = tf.Variable(tf.zeros([n_hidden_units_2], dtype=tf.float32), name = "MyBias_2", trainable=True)
-ww_3 = tf.Variable(tf.truncated_normal(shape=(n_hidden_units_2, n_outputs), stddev = .1, dtype=tf.float32), name = "MyWeights_final", trainable=True)
-bb_3 = tf.Variable(tf.zeros([n_outputs], dtype=tf.float32), name = "MyBias_3", trainable=True)
+ww_1 = tf.Variable(tf.truncated_normal(shape=(n_features, n_hidden_units_1), stddev = .1, dtype=tf.float32), name = "MyWeights_1")
+bb_1 = tf.Variable(tf.zeros([n_hidden_units_1], dtype=tf.float32), name = "MyBias_1")
+ww_2 = tf.Variable(tf.truncated_normal(shape=(n_hidden_units_1, n_hidden_units_2), stddev = .1, dtype=tf.float32), name = "MyWeights_2")
+bb_2 = tf.Variable(tf.zeros([n_hidden_units_2], dtype=tf.float32), name = "MyBias_2")
+ww_3 = tf.Variable(tf.truncated_normal(shape=(n_hidden_units_2, n_outputs), stddev = .1, dtype=tf.float32), name = "MyWeights_3")
+bb_3 = tf.Variable(tf.zeros([n_outputs], dtype=tf.float32), name = "MyBias_3")
 
 
 aa_1 = tf.nn.sigmoid(tf.matmul(xx, ww_1) + bb_1)
@@ -49,7 +46,6 @@ predict_yy = tf.nn.softmax(tf.matmul(aa_2, ww_3) + bb_3)
 
 
 # Evaluate the loss
-#loss = tf.reduce_sum(tf.squared_difference(predict_yy, yy, "MyLoss"))
 loss = tf.reduce_mean(-tf.reduce_sum(yy * tf.log(predict_yy), reduction_indices=[1]))
     
 
