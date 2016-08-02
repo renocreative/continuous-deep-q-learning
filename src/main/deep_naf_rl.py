@@ -4,69 +4,105 @@
 
 import tensorflow as tf
 
+n_epochs = 40
+e = .2
+reward_discount =.9
+actions = []
+R = [] # Initialize replay buffer R <- empty.
+m = 10 # minibatch size of transitions
 
-# Parameters
-n_epoch = 50
-n_features = 1
-n_examples = 3
-n_hidden_1 = 30
-n_hidden_2 = 10
+# Randomly initialize normalized Q network Q(x, u|W_Q).
+w1 = tf.Variable (tf.random(), shape=())
+w2 = tf.Variable (tf.random(), shape=())
+b1 = tf.Variable (tf.random(), shape=())
+b2 = tf.Variable (tf.random(), shape=())
+
+# Matrix of action-values (for each action) learned against a softmax of weight parameters, observation inputs and bias.
+a = tf.sigmoid (tf.matmul(w1, x) + b1)
+Qu = tf.softmax (tf.matmul(w2, a) + b2)
+
+# Qu = Au + V
+
+# Initialize target network Q' with weight W_Q' <- W_Q.
+target_w1 = tf.Variable (tf.val(w1), shape=())
+target_w2 = tf.Variable (tf.val(w2), shape=())
+target_b1 = tf.Variable (tf.val(b1), shape=())
+target_b2 = tf.Variable (tf.val(b2), shape=())
+
+target_a = tf.sigmoid (tf.matmul(target_w1, x) + target_b1)
+target_Qu = tf.softmax (tf.matmul(target_w2, target_a) + target_b2)
+
+# target_Qu = target_Au + target_V
 
 
-# Fetch the data
-def fetch():
-    return 0
+training_batch = tf.placeholder(none)
 
-
-# Define the model
-# Model inputs & outputs definitions
-xx = tf.placeholder(tf.float32, shape=(n_examples, n_features), name = "MyInputs")
-yy = tf.placeholder(tf.float32, shape=(n_examples), name = "MyLabels")
-
-# Model hypothesis
-ww = tf.Variable(tf.zeros(dtype=tf.float32, shape=(n_features, 1)), name = "MyWeights", trainable=True) 
-predict_yy = tf.matmul(ww, xx, transpose_b=True)
-
-
-# Evaluate the loss
-loss = tf.squared_difference(predict_yy, yy, "MyLoss")
+# Set y_i = r_i + discount * V W(x_i+1|W_Q')
+# y = r + reward_discount * target_Qu(next_x)
+y = training_batch.r + reward_discount * target_Qu(training_batch.next_x) # to be modified to use target network
     
+# The loss function: L = 1/N Sum_i 
+#(y_i - Q(x_i, u_i | W_Q))^2
+loss = 1/n * tf.squared_difference(y, Qu)
 
-# Train the model / Apply gradient updates (One Step)
-# Calculate gradient of the loss for each weight
-# + Update each weight
-opt = tf.train.GradientDescentOptimizer(learning_rate=0.01)
-minimizer = opt.minimize(loss, var_list=[ww])
 
-    
-# Evaluate the model against the test data. Test the model
-def eval(inputs):
-    return tf.matmul(ww, inputs, transpose_b=True)
-
-# Init variables
-init = tf.initialize_all_variables()
-
-tf.scalar_summary("Loss", tf.reduce_mean(loss))
-tf.scalar_summary("Weight", tf.reduce_mean(ww))
-merged = tf.merge_all_summaries()
 
 def main():
     print "Running %s" % __file__
-    fetch()
-    #tf.is_variable_initialized(ww)
-    with tf.Session() as sess:
-        # Create a summary writer, add the 'graph' to the event file.
-        writer = tf.train.SummaryWriter(".", sess.graph)
-        init.run()
-        for epoch in range(n_epoch):
-            summaries, _, _,_ =sess.run([merged, minimizer, loss, ww], feed_dict={xx:[[1],[2],[3]], yy:[2,4,6]})
-            
-            
-            print summaries
-            writer.add_summary(summaries,epoch)
-        
-    # print eval(test_data)
-        
+    for epoch in range(n_epochs):
+        # Initialize a random process N for action exploration
+        # Nothing to do
+        def getAction(x):
+            e_val = tf.random()
+            if e_val <= e:
+                #random selection
+                u = tf.random(actions)
+            else:
+                u = argmax Qu(x)
+            return u
+
+        # Receive initial observation state x_1 ∼ p(x_1)
+        x = environment.get()
+
+
+        for t in range(T)
+            # Select action ut = u*(x_t|W_u*) + N_t
+            u = getAction(x)
+
+            # Execute ut and observe r_t and x_t+1
+            next_x, r = environment.put(x, u)
+            x = next_x
+
+            # Store transition (x_t, u_t, r_t, x_t+1) in R
+            transition.x = x
+            transition.u = u
+            transition.r = r
+            transition.next_x = next_x
+            R.push(transition)
+
+            for iteration in range(I)
+                # Initialize training batch
+                training_batch = []
+
+                # Sample a random minibatch of m transitions from R
+                # Sequentially sample each transition
+                for count in range (m):
+                    i = tf.randomInt(R.size)
+                    training_batch.add(R[i])
+
+                # Update W_Q by minimizing the loss
+                loss_val = loss.eval(batch)
+                
+                print 'loss value is {:d}'.format(loss_val)
+                
+                # Update the target network: W_Q' ← kW_Q + (1 − k)W_Q'
+                k = 0.5
+                target_w1 = k * w1 + (1 - k) * target_w1
+                target_w2 = k * w2 + (1 - k) * target_w2
+                target_b1 = k * b1 + (1 - k) * target_b1
+                target_b2 = k * b2 + (1 - k) * target_b2
+
+
     
 if __name__ == '__main__': main()
     
