@@ -13,7 +13,7 @@ from tensorflow.examples.tutorials.mnist import input_data
 
 
 # Parameters
-n_epoch = 1200
+n_epoch = 100
 #n_features = 784
 n_examples = None
 #n_hidden_units_1 = 10
@@ -21,7 +21,10 @@ n_examples = None
 #n_outputs = 10
 learning_rate = 1e-4
 mini_batch_size = 100
-    
+
+x = tf.placeholder(tf.float32)
+yy = tf.placeholder(tf.float32)
+
 class MyConv2D:
     
     #x, xx, yy, predicted_y
@@ -47,10 +50,8 @@ class MyConv2D:
         return tf.nn.max_pool(convLayer, ksize = [1,2,2,1], strides = [1,2,2,1], padding='SAME') 
     
     def setup(self):
-        # Randomly initialize
-        self.x = tf.placeholder(tf.float32)
-        self.yy = tf.placeholder(tf.float32)
-        self.xx = tf.reshape(self.x, [-1,28,28,1])
+        # Randomly initialize      
+        self.xx = tf.reshape(x, [-1,28,28,1])
 
         # Conv layer 1
         self.w1 = self.createWeight([5,5,1,32])
@@ -80,11 +81,11 @@ class MyConv2D:
 
         return self.predicted_y
     
-    def loss(): #cross-entropy
-        return tf.reduce_mean(-tf.reduce_sum(self.yy * tf.log(self.predicted_y), reduction_indices=[1]))
+    def loss(self): #cross-entropy
+        return tf.reduce_mean(-tf.reduce_sum(yy * tf.log(self.predicted_y), reduction_indices=[1]))
     
-    def minimizer():
-        minimizer = tf.train.AdamOptimizer(learning_rate).minimize(loss())
+    def minimizer(self):
+        minimizer = tf.train.AdamOptimizer(learning_rate).minimize(self.loss())
  
 '''
 tf.scalar_summary("Loss", tf.reduce_mean(loss))
