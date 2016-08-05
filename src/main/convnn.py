@@ -22,13 +22,13 @@ n_examples = None
 learning_rate = 1e-4
 mini_batch_size = 100
 
-x = tf.placeholder(tf.float32)
-yy = tf.placeholder(tf.float32)
-
 class MyConv2D:
     
     #x, xx, yy, predicted_y
     #w1, w2, w3, b1, b2, b3
+    
+    x = tf.placeholder(tf.float32)
+    yy = tf.placeholder(tf.float32)
     
     # Fetch the mnist data 
     def fetch(self): 
@@ -51,7 +51,7 @@ class MyConv2D:
     
     def setup(self):
         # Randomly initialize      
-        self.xx = tf.reshape(x, [-1,28,28,1])
+        self.xx = tf.reshape(self.x, [-1,28,28,1])
 
         # Conv layer 1
         self.w1 = self.createWeight([5,5,1,32])
@@ -82,17 +82,17 @@ class MyConv2D:
         return self.predicted_y
     
     def loss(self): #cross-entropy
-        return tf.reduce_mean(-tf.reduce_sum(yy * tf.log(self.predicted_y), reduction_indices=[1]))
+        return tf.reduce_mean(-tf.reduce_sum(self.yy * tf.log(self.predicted_y), reduction_indices=[1]))
     
     def minimizer(self):
-        minimizer = tf.train.AdamOptimizer(learning_rate).minimize(self.loss())
+        return tf.train.GradientDescentOptimizer(learning_rate).minimize(self.loss())
  
 '''
 tf.scalar_summary("Loss", tf.reduce_mean(loss))
 tf.scalar_summary("Weight1", tf.reduce_mean(ww_1))
 tf.scalar_summary("Weight2", tf.reduce_mean(ww_2))
 tf.scalar_summary("Weight3", tf.reduce_mean(ww_3))'''
-merged = tf.merge_all_summaries()
+#merged = tf.merge_all_summaries()
     
 def main():
     print "Running {:s}".format(__file__)
@@ -106,19 +106,19 @@ def main():
         writer = tf.train.SummaryWriter(".", sess.graph)
         
         # Init variables
-        tf.initialize_all_variables().run()
+        sess.run(tf.initialize_all_variables())
         
         for epoch in range(n_epoch):
             batch = mnist.train.next_batch(mini_batch_size)
-            summaries, _, loss_val =sess.run([merged, convNN.minimizer(), convNN.loss()], feed_dict={x: batch[0], yy: batch[1]})
+            _, loss_val =sess.run([convNN.minimizer(), convNN.loss()], feed_dict={convNN.x: batch[0], convNN.yy: batch[1]})
             
             print "run epoch {:d}: loss value is {:f}".format(epoch, loss_val) 
             #print summaries
-            writer.add_summary(summaries,epoch)
+            #writer.add_summary(summaries,epoch)
         
-        correct_prediction = tf.equal(tf.argmax(convNN.yy,1), tf.argmax(convNN.predict_yy,1))
+        correct_prediction = tf.equal(tf.argmax(convNN.yy,1), tf.argmax(convNN.predicted_y,1))
         accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
-        accuracy_val = accuracy.eval(feed_dict={xx: mnist.test.images, yy: mnist.test.labels})
+        accuracy_val = accuracy.eval(feed_dict={convNN.x: mnist.test.images, convNN.yy: mnist.test.labels})
         print "\naccuracy is {:f}".format(accuracy_val*100)
     # print eval(test_data)
     
