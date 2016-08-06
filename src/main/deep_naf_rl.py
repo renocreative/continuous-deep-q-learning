@@ -109,7 +109,7 @@ def main():
 
                     # Update W_Q by minimizing the loss
                     # reshape batch.r into a one-hot vector of size = env.action_size
-                    _, loss_val = sess.run([minimizer, loss], feed_dict={training_batch: training_batch, Qu.xx: batch.x, Qu.y: batch.r})
+                    _, loss_val = sess.run([minimizer, loss], feed_dict={training_batch: training_batch, Qu.xx: batch.x, Qu.y: y})
 
                     print 'loss value is {:d}'.format(loss_val)
 
