@@ -19,14 +19,15 @@ T = 1000
 I = 16
 learningrate = .5
 
+#Create environment
+
 # Randomly initialize normalized Q network Q(x, u|W_Q).
-Qu = myConv2D()
+Qu = myConv2D(env.action_size)
 # Qu = Au + V
 
 
-
 # Empty!
-target_Qu = myConv2D()
+target_Qu = myConv2D(env.action_size)
 # target_Qu = target_Au + target_V
 
 # Initialize target network Q' with weight W_Q' <- W_Q.
