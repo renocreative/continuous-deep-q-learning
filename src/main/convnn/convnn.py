@@ -18,7 +18,7 @@ n_epoch = 100
 n_examples = None
 #n_hidden_units_1 = 10
 #n_hidden_units_2 = 5
-#n_outputs = 10
+n_outputs = 10
 learning_rate = 1e-4
 mini_batch_size = 100
 
@@ -34,10 +34,11 @@ class MyConv2D:
     def fetch(self): 
         return input_data.read_data_sets('MNIST_data', one_hot = True) 
     
-    def __init__(self):
+    def __init__(self, n_outputs):
         self.setup()
         self.loss()
         self.minimizer()
+        self.n_outputs = n_outputs
     
     def createWeight(self, shape):
         return tf.Variable (tf.truncated_normal(shape=shape, stddev=.1))
@@ -76,8 +77,8 @@ class MyConv2D:
         nnlayer3 = tf.nn.relu (tf.matmul(pooled_conv2_flat, self.w3) + self.b3)
         
         # Readout Layer
-        self.w4 = self.createWeight([1024, 10])
-        self.b4 = self.createBias([10])
+        self.w4 = self.createWeight([1024, self.n_outputs])
+        self.b4 = self.createBias([self.n_outputs])
         
         self.predicted_y =tf.nn.softmax(tf.matmul(nnlayer3, self.w4) + self.b4)
 
