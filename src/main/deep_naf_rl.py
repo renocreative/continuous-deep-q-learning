@@ -45,10 +45,13 @@ target_Qu.b4.assign(Qu.b4)
 
 training_batch = tf.placeholder(none)
 
+# reshape batch.r into a one-hot vector of size = env.action_size
+r_onehot = tf.one_hot(training_batch.u, env.action_size, training_batch.r, 0.0, name='action_one_hot')
+
 # Set y_i = r_i + discount * V W(x_i+1|W_Q')
 # y = r + reward_discount * target_Qu(next_x)
-y = training_batch.r + reward_discount * target_Qu(training_batch.next_x) # to be modified to use state value instead of q-value
-    
+y = r_onehot + reward_discount * target_Qu(training_batch.next_x) # to be modified to use state value instead of q-value
+
 # The loss function: L = 1/N Sum_i 
 #(y_i - Q(x_i, u_i | W_Q))^2
 loss = 1/m * tf.squared_difference(y, Qu) # reshape into one-hot vectors
@@ -108,7 +111,6 @@ def main():
                         training_batch.add(R[i])
 
                     # Update W_Q by minimizing the loss
-                    # reshape batch.r into a one-hot vector of size = env.action_size
                     _, loss_val = sess.run([minimizer, loss], feed_dict={training_batch: training_batch, Qu.xx: batch.x, Qu.y: y})
 
                     print 'loss value is {:d}'.format(loss_val)
