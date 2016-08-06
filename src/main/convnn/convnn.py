@@ -102,7 +102,7 @@ def main():
     
     #tf.is_variable_initialized(ww)
     with tf.Session() as sess:
-        convNN = MyConv2D()
+        convNN = MyConv2D(10)
         minimizer = convNN.minimizer()
         loss = convNN.loss()
         mnist = convNN.fetch()
