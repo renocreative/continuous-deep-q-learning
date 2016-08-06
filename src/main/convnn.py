@@ -36,6 +36,8 @@ class MyConv2D:
     
     def __init__(self):
         self.setup()
+        self.loss()
+        self.minimizer()
     
     def createWeight(self, shape):
         return tf.Variable (tf.truncated_normal(shape=shape, stddev=.1))
@@ -71,7 +73,7 @@ class MyConv2D:
         self.w3 = self.createWeight([7*7*64,1024])
         self.b3 = self.createBias([1024])
         pooled_conv2_flat = tf.reshape(pooled_conv2, [-1, 7*7*64])
-        nnlayer3 = tf.nn.softmax (tf.matmul(pooled_conv2_flat, self.w3) + self.b3)
+        nnlayer3 = tf.nn.relu (tf.matmul(pooled_conv2_flat, self.w3) + self.b3)
         
         # Readout Layer
         self.w4 = self.createWeight([1024, 10])
@@ -85,7 +87,7 @@ class MyConv2D:
         return tf.reduce_mean(-tf.reduce_sum(self.yy * tf.log(self.predicted_y), reduction_indices=[1]))
     
     def minimizer(self):
-        return tf.train.GradientDescentOptimizer(learning_rate).minimize(self.loss())
+        return tf.train.AdamOptimizer(learning_rate).minimize(self.loss())
  
 '''
 tf.scalar_summary("Loss", tf.reduce_mean(loss))
@@ -100,6 +102,8 @@ def main():
     #tf.is_variable_initialized(ww)
     with tf.Session() as sess:
         convNN = MyConv2D()
+        minimizer = convNN.minimizer()
+        loss = convNN.loss()
         mnist = convNN.fetch()
         
         # Create a summary writer, add the 'graph' to the event file.
@@ -110,7 +114,7 @@ def main():
         
         for epoch in range(n_epoch):
             batch = mnist.train.next_batch(mini_batch_size)
-            _, loss_val =sess.run([convNN.minimizer(), convNN.loss()], feed_dict={convNN.x: batch[0], convNN.yy: batch[1]})
+            _, loss_val =sess.run([minimizer, loss], feed_dict={convNN.x: batch[0], convNN.yy: batch[1]})
             
             print "run epoch {:d}: loss value is {:f}".format(epoch, loss_val) 
             #print summaries
