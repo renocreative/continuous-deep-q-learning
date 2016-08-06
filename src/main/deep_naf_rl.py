@@ -36,8 +36,12 @@ target_Qu = myConv2D(env.action_size)
 # Initialize target network Q' with weight W_Q' <- W_Q.
 target_Qu.w1.assign(Qu.w1)
 target_Qu.w2.assign(Qu.w2)
+target_Qu.w3.assign(Qu.w3)
+target_Qu.w4.assign(Qu.w4)
 target_Qu.b1.assign(Qu.b1)
 target_Qu.b2.assign(Qu.b2)
+target_Qu.b3.assign(Qu.b3)
+target_Qu.b4.assign(Qu.b4)
 
 training_batch = tf.placeholder(none)
 
@@ -111,8 +115,12 @@ def main():
                     # Update the target network: W_Q' ← kW_Q + (1 − k)W_Q'
                     target_Qu.w1.assign(k * Qu.w1 + (1 - k) * target_Qu.w1)
                     target_Qu.w2.assign(k * Qu.w2 + (1 - k) * target_Qu.w2)
+                    target_Qu.w1.assign(k * Qu.w3 + (1 - k) * target_Qu.w3)
+                    target_Qu.w2.assign(k * Qu.w4 + (1 - k) * target_Qu.w4)
                     target_Qu.b1.assign(k * Qu.b1 + (1 - k) * target_Qu.b1)
                     target_Qu.b2.assign(k * Qu.b2 + (1 - k) * target_Qu.b2)
+                    target_Qu.b1.assign(k * Qu.b3 + (1 - k) * target_Qu.b3)
+                    target_Qu.b2.assign(k * Qu.b4 + (1 - k) * target_Qu.b4)
                     
             if done == true:
                 if best_score < total_reward
