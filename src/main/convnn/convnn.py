@@ -25,7 +25,7 @@ mini_batch_size = 100
 class MyConv2D:
     
     #x, xx, yy, predicted_y
-    #w1, w2, w3, b1, b2, b3
+    #w1, w2, w3, w4, b1, b2, b3, b4
     
     x = tf.placeholder(tf.float32)
     yy = tf.placeholder(tf.float32)
