@@ -1,8 +1,10 @@
 '''
     Deep Reinforcement Learning using Normalized Advantage Functions for Continuous Action Spaces
+    Adapted for OpenAi Gym's Atari Environments
 '''
 
 import tensorflow as tf
+from convnn.convnn import conv2D
 
 n_epochs = 40
 e = .2
@@ -11,6 +13,7 @@ actions = []
 R = [] # Initialize replay buffer R <- empty.
 m = 10 # minibatch size of transitions
 bias_size = 64
+total_reward = 0
 
 # Randomly initialize normalized Q network Q(x, u|W_Q).
 Qu = myConv2D()
@@ -33,62 +36,71 @@ y = training_batch.r + reward_discount * target_Qu(training_batch.next_x) # to b
 #(y_i - Q(x_i, u_i | W_Q))^2
 loss = 1/n * tf.squared_difference(y, Qu)
 
+minimizer = tf.train.GradientDescentOptimizer(learningrate).minimize(loss)
+
 
 
 def main():
     print "Running %s" % __file__
-    for epoch in range(n_epochs):
-        # Initialize a random process N for action exploration
-        # Nothing to do
-        def getAction(x):
-            e_val = tf.random()
-            if e_val <= e:
-                #random selection
-                u = tf.random(actions)
-            else:
-                u = argmax Qu(x)
-            return u
+    with tf.Session() as sess:
+        sess.run(tf.initialize_all_variables())
+        
+        for epoch in range(n_epochs):
+            # Initialize a random process N for action exploration
+            # Nothing to do
+            def getAction(x):
+                e_val = tf.random_uniform(shape=[], maxval=1)
+                if e_val <= e:
+                    #random selection
+                    u = tf.random_uniform(shape=[], maxval=env.action_size, dtype=tf.int32)
+                else:
+                    u = argmax Qu(x)
+                return u
 
-        # Receive initial observation state x_1 ∼ p(x_1)
-        x = environment.get()
+            # Receive initial observation state x_1 ∼ p(x_1)
+            x = env.get()
 
 
-        for t in range(T)
-            # Select action ut = u*(x_t|W_u*) + N_t
-            u = getAction(x)
+            for t in range(T)
+                # Select action ut = u*(x_t|W_u*) + N_t
+                u = getAction(x)
 
-            # Execute ut and observe r_t and x_t+1
-            next_x, r = environment.put(x, u)
-            x = next_x
+                # Execute ut and observe r_t and x_t+1
+                next_x, r, done = env.act(u)
+                x = next_x
 
-            # Store transition (x_t, u_t, r_t, x_t+1) in R
-            transition.x = x
-            transition.u = u
-            transition.r = r
-            transition.next_x = next_x
-            R.push(transition)
+                # Store transition (x_t, u_t, r_t, x_t+1) in R
+                transition = {}
+                transition.x = x
+                transition.u = u
+                transition.r = r
+                transition.next_x = next_x
+                R.append(transition)
 
-            for iteration in range(I)
-                # Initialize training batch
-                training_batch = []
+                # Track statistics
+                total_reward += r
 
-                # Sample a random minibatch of m transitions from R
-                # Sequentially sample each transition
-                for count in range (m):
-                    i = tf.randomInt(R.size)
-                    training_batch.add(R[i])
+                for iteration in range(I)
+                    # Initialize training batch
+                    training_batch = []
 
-                # Update W_Q by minimizing the loss
-                loss_val = loss.eval(batch)
-                
-                print 'loss value is {:d}'.format(loss_val)
-                
-                # Update the target network: W_Q' ← kW_Q + (1 − k)W_Q'
-                k = 0.5
-                target_w1 = k * w1 + (1 - k) * target_w1
-                target_w2 = k * w2 + (1 - k) * target_w2
-                target_b1 = k * b1 + (1 - k) * target_b1
-                target_b2 = k * b2 + (1 - k) * target_b2
+                    # Sample a random minibatch of m transitions from R
+                    # Sequentially sample each transition
+                    for count in range (m):
+                        i = tf.random_uniform(maxval=len(R), dtype=tf.int32)
+                        training_batch.add(R[i])
+
+                    # Update W_Q by minimizing the loss
+                    _, loss_val = sess.run([minimizer, loss], feed_dict={Qu.xx: batch.x})
+
+                    print 'loss value is {:d}'.format(loss_val)
+
+                    # Update the target network: W_Q' ← kW_Q + (1 − k)W_Q'
+                    k = 0.5
+                    target_Qu.w1.assign(k * Qu.w1 + (1 - k) * target_Qu.w1)
+                    target_Qu.w2.assign(k * Qu.w2 + (1 - k) * target_Qu.w2)
+                    target_Qu.b1.assign(k * Qu.b1 + (1 - k) * target_Qu.b1)
+                    target_Qu.b2.assign(k * Qu.b2 + (1 - k) * target_Qu.b2)
 
 
     
