@@ -9,32 +9,41 @@ from convnn.convnn import conv2D
 n_epochs = 40
 e = .2
 reward_discount =.9
-actions = []
+k = 0.5 # Parameter for updating the target Q network
 R = [] # Initialize replay buffer R <- empty.
 m = 10 # minibatch size of transitions
 bias_size = 64
 total_reward = 0
+best_score = -999999999
+T = 1000
+I = 16
+learningrate = .5
 
 # Randomly initialize normalized Q network Q(x, u|W_Q).
 Qu = myConv2D()
 # Qu = Au + V
 
 
-# Initialize target network Q' with weight W_Q' <- W_Q.
+
 # Empty!
 target_Qu = myConv2D()
 # target_Qu = target_Au + target_V
 
+# Initialize target network Q' with weight W_Q' <- W_Q.
+target_Qu.w1.assign(Qu.w1)
+target_Qu.w2.assign(Qu.w2)
+target_Qu.b1.assign(Qu.b1)
+target_Qu.b2.assign(Qu.b2)
 
 training_batch = tf.placeholder(none)
 
 # Set y_i = r_i + discount * V W(x_i+1|W_Q')
 # y = r + reward_discount * target_Qu(next_x)
-y = training_batch.r + reward_discount * target_Qu(training_batch.next_x) # to be modified to use target network
+y = training_batch.r + reward_discount * target_Qu(training_batch.next_x) # to be modified to use state value instead of q-value
     
 # The loss function: L = 1/N Sum_i 
 #(y_i - Q(x_i, u_i | W_Q))^2
-loss = 1/n * tf.squared_difference(y, Qu)
+loss = 1/m * tf.squared_difference(y, Qu)
 
 minimizer = tf.train.GradientDescentOptimizer(learningrate).minimize(loss)
 
@@ -54,12 +63,12 @@ def main():
                     #random selection
                     u = tf.random_uniform(shape=[], maxval=env.action_size, dtype=tf.int32)
                 else:
-                    u = argmax Qu(x)
+                    u = argmax( Qu(x) )
                 return u
 
-            # Receive initial observation state x_1 ∼ p(x_1)
-            x = env.get()
 
+            # Receive initial observation state x_1 ∼ p(x_1)
+            x = env.reset()
 
             for t in range(T)
                 # Select action ut = u*(x_t|W_u*) + N_t
@@ -91,16 +100,20 @@ def main():
                         training_batch.add(R[i])
 
                     # Update W_Q by minimizing the loss
-                    _, loss_val = sess.run([minimizer, loss], feed_dict={Qu.xx: batch.x})
+                    _, loss_val = sess.run([minimizer, loss], feed_dict={training_batch: training_batch, Qu.xx: batch.x, Qu.y: batch.y})
 
                     print 'loss value is {:d}'.format(loss_val)
 
                     # Update the target network: W_Q' ← kW_Q + (1 − k)W_Q'
-                    k = 0.5
                     target_Qu.w1.assign(k * Qu.w1 + (1 - k) * target_Qu.w1)
                     target_Qu.w2.assign(k * Qu.w2 + (1 - k) * target_Qu.w2)
                     target_Qu.b1.assign(k * Qu.b1 + (1 - k) * target_Qu.b1)
                     target_Qu.b2.assign(k * Qu.b2 + (1 - k) * target_Qu.b2)
+                    
+            if done == true:
+                if best_score < total_reward
+                    best_score = total_reward
+                break
 
 
     
