@@ -44,7 +44,7 @@ y = training_batch.r + reward_discount * target_Qu(training_batch.next_x) # to b
     
 # The loss function: L = 1/N Sum_i 
 #(y_i - Q(x_i, u_i | W_Q))^2
-loss = 1/m * tf.squared_difference(y, Qu)
+loss = 1/m * tf.squared_difference(y, Qu) # reshape into one-hot vectors
 
 minimizer = tf.train.GradientDescentOptimizer(learningrate).minimize(loss)
 
@@ -64,7 +64,7 @@ def main():
                     #random selection
                     u = tf.random_uniform(shape=[], maxval=env.action_size, dtype=tf.int32)
                 else:
-                    u = argmax( Qu(x) )
+                    u = tf.argmax( Qu(x) )
                 return u
 
 
