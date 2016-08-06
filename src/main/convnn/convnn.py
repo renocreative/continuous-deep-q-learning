@@ -7,7 +7,7 @@ from tensorflow.examples.tutorials.mnist import input_data
 
 '''
 
-    Classic ConvNets Architecture: Conv -> Pooling -> Conv -> Pooling -> NN -> Classifier
+    Classic ConvNets Architecture: Conv -> Pooling -> Conv -> Pooling -> Fully Connected -> Classifier
 
 '''
 
