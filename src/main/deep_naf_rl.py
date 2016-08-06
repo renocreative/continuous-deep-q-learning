@@ -24,6 +24,9 @@ learningrate = .5
 # Randomly initialize normalized Q network Q(x, u|W_Q).
 Qu = myConv2D(env.action_size)
 # Qu = Au + V
+# the advantage for a given state-action pair under a policy pi is 
+# its q-value under that policy minus the best q-value that can be outputed under that policy
+# Au = Qu - V => Au = Qu(s)[u] - tf.reduce_max( Qu(s) )
 
 
 # Empty!
