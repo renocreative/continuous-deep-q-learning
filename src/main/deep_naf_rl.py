@@ -88,7 +88,7 @@ def main():
                 u = getAction(x)
 
                 # Execute ut and observe r_t and x_t+1
-                next_x, r, done = env.act(u)
+                next_x, r, done = env.step(u)
                 x = next_x
 
                 # Store transition (x_t, u_t, r_t, x_t+1) in R
