@@ -4,6 +4,7 @@
 '''
 
 import tensorflow as tf
+import gym
 from convnn.convnn import conv2D
 
 n_epochs = 40
@@ -20,6 +21,7 @@ I = 16
 learningrate = .5
 
 #Create environment
+env = gym.make('SpaceInvaders-v0')
 
 # Randomly initialize normalized Q network Q(x, u|W_Q).
 Qu = myConv2D(env.action_size)
